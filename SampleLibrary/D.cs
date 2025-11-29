@@ -1,8 +1,8 @@
 ﻿namespace SampleLibrary;
 
-public class Four
+public class D
 {
-    public async Task<int> FuncFour()
+    public async Task<int> CallD()
     {
         System.Diagnostics.Debug.WriteLine("FuncFour started");
 
