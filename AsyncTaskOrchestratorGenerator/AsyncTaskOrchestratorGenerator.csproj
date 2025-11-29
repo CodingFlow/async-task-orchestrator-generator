@@ -14,7 +14,7 @@
         <Description>C# source generator for executing dependent async tasks optimally and easily.</Description>
         <Authors>Coding Flow</Authors>
         <RepositoryType>git</RepositoryType>
-        <PackageIcon>nuget-package-logo.png</PackageIcon>
+        <PackageIcon></PackageIcon>
         <PackageReleaseNotes></PackageReleaseNotes>
     </PropertyGroup>
 

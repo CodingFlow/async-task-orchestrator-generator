@@ -1,5 +1,8 @@
 # async-task-orchestrator-generator
 
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/CodingFlow/async-task-orchestrator-generator/pull-request.yml)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/CodingFlow)](https://github.com/sponsors/CodingFlow)
+
 C# source generator for executing dependent async tasks optimally and easily.
 
 Orchestrating multiple asynchronous operations in C# can be challenging,
