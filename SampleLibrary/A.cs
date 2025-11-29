@@ -4,16 +4,8 @@ public class A
 {
     public async Task<int> CallA()
     {
-        System.Diagnostics.Debug.WriteLine("FuncOne started");
-
-        await Task.Delay(1000);
-
-        System.Diagnostics.Debug.WriteLine("FuncOne ended");
+        await Utils.DebugDelay(nameof(CallA), 1000);
 
         return await Task.FromResult(1);
-    }
-
-    public int Blah() {
-        return 5;
     }
 }

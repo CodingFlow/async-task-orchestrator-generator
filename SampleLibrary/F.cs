@@ -4,7 +4,7 @@ public class F
 {
     public async Task<int> CallF(int inputOne, int inputTwo)
     {
-        System.Diagnostics.Debug.WriteLine("FuncFinal started");
+        await Utils.DebugDelay(nameof(CallF), 0);
         return await Task.FromResult(inputOne + inputTwo);
     }
 }

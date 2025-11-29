@@ -3,7 +3,7 @@
 namespace SampleLibrary;
 
 [AsyncTaskOrchestrator]
-internal class OrchestratorSpec
+public class OrchestratorSpec
 {
     private readonly A a;
     private readonly B b;
