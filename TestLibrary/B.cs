@@ -1,8 +1,8 @@
 ﻿namespace TestLibrary;
 
-public class Two
+public class B
 {
-    public async Task<int> FuncTwo()
+    public async Task<int> CallB()
     {
         System.Diagnostics.Debug.WriteLine("FuncTwo started");
 

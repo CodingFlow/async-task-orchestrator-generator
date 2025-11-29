@@ -1,8 +1,8 @@
 ﻿namespace TestLibrary;
 
-public class Three
+public class C
 {
-    public async Task<int> FuncThree(int inputOne, int inputTwo)
+    public async Task<int> CallC(int inputOne, int inputTwo)
     {
         System.Diagnostics.Debug.WriteLine("FuncThree started");
 

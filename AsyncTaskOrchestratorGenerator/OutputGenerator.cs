@@ -139,7 +139,9 @@ namespace {type.ContainingNamespace.ToDisplayString()};
 
             var formattedWhenEach = $@"await foreach (var completed in Task.WhenEach(tasksToProcess))
         {{
-            { string.Join(@"", formattedHandleTaskCompletions)}
+            { string.Join(@"
+
+            ", formattedHandleTaskCompletions)}
         }}";
 
             var dependencyTaskName = finalTaskData.DependenciesOutputNames.Select(depName => data[depName].TaskName);

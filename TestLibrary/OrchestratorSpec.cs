@@ -5,27 +5,30 @@ namespace TestLibrary;
 [AsyncTaskOrchestrator]
 internal class OrchestratorSpec
 {
-    private readonly One one;
-    private readonly Two two;
-    private readonly Three three;
-    private readonly Four four;
-    private readonly Final final;
+    private readonly A a;
+    private readonly B b;
+    private readonly C c;
+    private readonly D d;
+    private readonly E e;
+    private readonly F f;
 
-    public OrchestratorSpec(One one, Two two, Three three, Four four, Final final)
+    public OrchestratorSpec(A a, B b, C c, D d, E e, F f)
     {
-        this.one = one;
-        this.two = two;
-        this.three = three;
-        this.four = four;
-        this.final = final;
+        this.a = a;
+        this.b = b;
+        this.c = c;
+        this.d = d;
+        this.e = e;
+        this.f = f;
     }
 
     public Task<int> Spec()
     {
-        var resultOne = one.FuncOne(); 
-        var resultTwo = two.FuncTwo();
-        var resultThree = three.FuncThree(resultOne.Result, resultTwo.Result);
-        var resultFour = four.FuncFour(); 
-        return final.FuncFinal(resultThree.Result, resultFour.Result);
+        var resultA = a.CallA(); 
+        var resultB = b.CallB();
+        var resultC = c.CallC(resultA.Result, resultB.Result);
+        var resultD = d.CallD(); 
+        var resultE = e.CallE(resultD.Result);
+        return f.CallF(resultC.Result, resultE.Result);
     }
 }

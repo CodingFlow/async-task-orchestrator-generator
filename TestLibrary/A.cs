@@ -1,8 +1,8 @@
 ﻿namespace TestLibrary;
 
-public class One
+public class A
 {
-    public async Task<int> FuncOne()
+    public async Task<int> CallA()
     {
         System.Diagnostics.Debug.WriteLine("FuncOne started");
 

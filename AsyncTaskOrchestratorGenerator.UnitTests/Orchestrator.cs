@@ -8,40 +8,49 @@ namespace TestLibrary;
 
 internal class Orchestrator
 {
-    private readonly TestLibrary.One one;
-    private readonly TestLibrary.Two two;
-    private readonly TestLibrary.Three three;
-    private readonly TestLibrary.Four four;
-    private readonly TestLibrary.Final final;
+    private readonly TestLibrary.A a;
+    private readonly TestLibrary.B b;
+    private readonly TestLibrary.C c;
+    private readonly TestLibrary.D d;
+    private readonly TestLibrary.E e;
+    private readonly TestLibrary.F f;
 
-    public Orchestrator(TestLibrary.One one, TestLibrary.Two two, TestLibrary.Three three, TestLibrary.Four four, TestLibrary.Final final)
+    public Orchestrator(TestLibrary.A a, TestLibrary.B b, TestLibrary.C c, TestLibrary.D d, TestLibrary.E e, TestLibrary.F f)
     {
-        this.one = one;
-        this.two = two;
-        this.three = three;
-        this.four = four;
-        this.final = final;
+        this.a = a;
+        this.b = b;
+        this.c = c;
+        this.d = d;
+        this.e = e;
+        this.f = f;
     }
 
     public async Task<int> Execute()
     {
-        var resultOneTask = one.FuncOne();
-        var resultTwoTask = two.FuncTwo();
-        var resultThreeTask = new System.Threading.Tasks.Task<int>(() => default);
-        var resultFourTask = four.FuncFour();
+        var resultATask = a.CallA();
+        var resultBTask = b.CallB();
+        var resultCTask = new System.Threading.Tasks.Task<int>(() => default);
+        var resultDTask = d.CallD();
+        var resultETask = new System.Threading.Tasks.Task<int>(() => default);
 
-        var tasksToProcess = new List<Task> { resultOneTask, resultTwoTask, resultFourTask };
+        var tasksToProcess = new List<Task> { resultATask, resultBTask, resultDTask };
 
         await foreach (var completed in Task.WhenEach(tasksToProcess))
         {
-            if (!resultThreeTask.IsCompleted && resultOneTask.IsCompleted && resultTwoTask.IsCompleted)
+            if (!resultCTask.IsCompleted && resultATask.IsCompleted && resultBTask.IsCompleted)
             {
-                resultThreeTask = three.FuncThree(resultOneTask.Result, resultTwoTask.Result);
-                tasksToProcess.Add(resultThreeTask);
+                resultCTask = c.CallC(resultATask.Result, resultBTask.Result);
+                tasksToProcess.Add(resultCTask);
+            }
+
+            if (!resultETask.IsCompleted && resultDTask.IsCompleted)
+            {
+                resultETask = e.CallE(resultDTask.Result);
+                tasksToProcess.Add(resultETask);
             }
         }
 
-        var finalResult = await final.FuncFinal(resultThreeTask.Result, resultFourTask.Result);
+        var finalResult = await f.CallF(resultCTask.Result, resultETask.Result);
 
         return finalResult;
     }
