@@ -1,6 +1,8 @@
-# async-task-orchestrator-generator
+# Async Task Orchestrator Generator
 
+![NuGet Version](https://img.shields.io/nuget/v/AsyncTaskOrchestratorGenerator)
 ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/CodingFlow/async-task-orchestrator-generator/pull-request.yml)
+![NuGet Downloads](https://img.shields.io/nuget/dt/AsyncTaskOrchestratorGenerator)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/CodingFlow)](https://github.com/sponsors/CodingFlow)
 
 C# source generator for executing dependent async tasks optimally and easily.
