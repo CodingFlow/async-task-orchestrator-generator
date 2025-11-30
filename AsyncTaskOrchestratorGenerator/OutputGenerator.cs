@@ -81,30 +81,7 @@ namespace {type.ContainingNamespace.ToDisplayString()};
             var executeMethod = GetExecuteMethod(type);
             var statements = (executeMethod.DeclaringSyntaxReferences.First().GetSyntax() as MethodDeclarationSyntax).Body.Statements;
             var variableStatements = statements.Remove(statements.Last());
-
-            var variableData = variableStatements
-                .Select(s => s as LocalDeclarationStatementSyntax)
-                .SelectMany(v => v.Declaration.Variables)
-                .Select(declarationSyntax => {
-                    var invocation = declarationSyntax.Initializer.Value as InvocationExpressionSyntax;
-                    var methodAccessExpression = invocation.Expression as MemberAccessExpressionSyntax;
-                    var methodCallTypeName = methodAccessExpression.ToString().Split('.').First();
-                    var methodCallType = fields.First(f => f.Name == methodCallTypeName).Type;
-                    var methodCallName = methodAccessExpression.ToString().Split('.').Last();
-                    var methodSymbol = methodCallType.GetMembers(methodCallName).First() as IMethodSymbol;
-
-                    var arguments = invocation.ArgumentList.Arguments;
-                    var argumentTypeNames = arguments.Select(a => a.ToString().Split('.').First());
-
-                    return new TaskData
-                    {
-                        OutputName = declarationSyntax.Identifier.Text,
-                        MethodCallName = methodAccessExpression.ToString(),
-                        MethodCallReturnType = methodSymbol.ReturnType.ToString(),
-                        DependenciesOutputNames = argumentTypeNames,
-                        TaskName = $"{declarationSyntax.Identifier.Text}Task"
-                    };
-                });
+            var variableData = GetVariableData(fields, variableStatements);
 
             var lastStatement = statements.Last() as ReturnStatementSyntax;
             var invocation = lastStatement.Expression as InvocationExpressionSyntax;
@@ -134,6 +111,32 @@ namespace {type.ContainingNamespace.ToDisplayString()};
             }, variableData.ToDictionary(taskData => taskData.OutputName), finalTaskData);
         }
 
+        private static IEnumerable<TaskData> GetVariableData(IEnumerable<IFieldSymbol> fields, SyntaxList<StatementSyntax> variableStatements) {
+            return variableStatements
+                .Select(s => s as LocalDeclarationStatementSyntax)
+                .SelectMany(v => v.Declaration.Variables)
+                .Select(declarationSyntax => {
+                    var invocation = declarationSyntax.Initializer.Value as InvocationExpressionSyntax;
+                    var methodAccessExpression = invocation.Expression as MemberAccessExpressionSyntax;
+                    var methodCallTypeName = methodAccessExpression.ToString().Split('.').First();
+                    var methodCallType = fields.First(f => f.Name == methodCallTypeName).Type;
+                    var methodCallName = methodAccessExpression.ToString().Split('.').Last();
+                    var methodSymbol = methodCallType.GetMembers(methodCallName).First() as IMethodSymbol;
+
+                    var arguments = invocation.ArgumentList.Arguments;
+                    var argumentTypeNames = arguments.Select(a => a.ToString().Split('.').First());
+
+                    return new TaskData
+                    {
+                        OutputName = declarationSyntax.Identifier.Text,
+                        MethodCallName = methodAccessExpression.ToString(),
+                        MethodCallReturnType = methodSymbol.ReturnType.ToString(),
+                        DependenciesOutputNames = argumentTypeNames,
+                        TaskName = $"{declarationSyntax.Identifier.Text}Task"
+                    };
+                });
+        }
+
         private static IMethodSymbol GetExecuteMethod(INamedTypeSymbol type) {
             return type
                             .GetMembers()
@@ -145,15 +148,43 @@ namespace {type.ContainingNamespace.ToDisplayString()};
             var formattedTaskDeclarations = data.Select(keyValue => {
                 var item = keyValue.Value;
                 var hasDependencies = item.DependenciesOutputNames.Any();
-                return hasDependencies ? 
-                $@"var {item.TaskName} = new {item.MethodCallReturnType}(() => default);":
+                return hasDependencies ?
+                $@"var {item.TaskName} = new {item.MethodCallReturnType}(() => default);" :
                 $@"var {item.TaskName} = {item.MethodCallName}();";
             });
 
             var taskNames = data.Where(keyValue => !keyValue.Value.DependenciesOutputNames.Any()).Select(keyValue => keyValue.Value.TaskName);
             var formattedTasksList = $@"var tasksToProcess = new List<Task> {{ {string.Join(@", ", taskNames)} }};";
+            var formattedHandleTaskCompletions = CreateFormattedHandleTaskCompletions(data);
 
-            var formattedHandleTaskCompletions = data.Where(keyValue => keyValue.Value.DependenciesOutputNames.Any()).Select(keyValue => {
+            var formattedWhenEach = $@"await foreach (var completed in Task.WhenEach(tasksToProcess))
+        {{
+            {string.Join(@"
+
+            ", formattedHandleTaskCompletions)}
+        }}";
+
+            var dependencyTaskName = finalTaskData.DependenciesOutputNames.Select(depName => data[depName].TaskName);
+            var formattedResultDependencyTaskNames = string.Join(", ", dependencyTaskName.Select(tn => $"{tn}.Result"));
+            var formattedFinalResult = $@"var finalResult = await {finalTaskData.MethodCallName}({formattedResultDependencyTaskNames});
+
+        return finalResult;";
+
+            return $@"{signatureData.AccessModifier} async {signatureData.ReturnType} {signatureData.Name}()
+    {{
+        {string.Join(@"
+        ", formattedTaskDeclarations)}
+
+        {formattedTasksList}
+
+        {formattedWhenEach}
+
+        {formattedFinalResult}
+    }}";
+        }
+
+        private static IEnumerable<string> CreateFormattedHandleTaskCompletions(Dictionary<string, TaskData> data) {
+            return data.Where(keyValue => keyValue.Value.DependenciesOutputNames.Any()).Select(keyValue => {
                 var item = keyValue.Value;
                 var dependencyTaskNames = item.DependenciesOutputNames.Select(depName => data[depName].TaskName);
                 var formattedCompletedDependencyTaskNames = string.Join(" && ", dependencyTaskNames.Select(tn => $"{tn}.IsCompleted"));
@@ -167,31 +198,6 @@ namespace {type.ContainingNamespace.ToDisplayString()};
                 {formattedAddTaskToList}
             }}";
             });
-
-            var formattedWhenEach = $@"await foreach (var completed in Task.WhenEach(tasksToProcess))
-        {{
-            { string.Join(@"
-
-            ", formattedHandleTaskCompletions)}
-        }}";
-
-            var dependencyTaskName = finalTaskData.DependenciesOutputNames.Select(depName => data[depName].TaskName);
-            var formattedResultDependencyTaskNames = string.Join(", ", dependencyTaskName.Select(tn => $"{tn}.Result"));
-            var formattedFinalResult = $@"var finalResult = await {finalTaskData.MethodCallName}({formattedResultDependencyTaskNames});
-
-        return finalResult;";
-            
-            return $@"{signatureData.AccessModifier} async {signatureData.ReturnType} {signatureData.Name}()
-    {{
-        {string.Join(@"
-        ", formattedTaskDeclarations) }
-
-        {formattedTasksList}
-
-        {formattedWhenEach}
-
-        {formattedFinalResult}
-    }}";
         }
 
         private static string FormatConstructor(INamedTypeSymbol type, string className, IEnumerable<ISymbol> typeMembers) {
