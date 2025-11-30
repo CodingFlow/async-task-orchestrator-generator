@@ -14,6 +14,7 @@ namespace AsyncTaskOrchestratorGenerator
             var constructorArguments = GetAttributeConstructorArguments(type);
             var className = constructorArguments.First().Value.ToString();
             var executeMethodName = constructorArguments.ElementAt(1).Value.ToString();
+            var interfaceName = $"I{className}";
 
             var accessModifier = type.DeclaredAccessibility.ToString().ToLower();
             var typeMembers = type.GetMembers();
@@ -35,7 +36,7 @@ using System.Threading.Tasks;
 
 namespace {type.ContainingNamespace.ToDisplayString()};
 
-{accessModifier} class {className}
+{accessModifier} class {className} : {interfaceName}
 {{
 {string.Join(@"
 ", formattedFields)}

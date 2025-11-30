@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TestLibrary;
 
-internal class Orchestrator
+internal class Orchestrator : IOrchestrator
 {
     private readonly TestLibrary.A a;
     private readonly TestLibrary.B b;
