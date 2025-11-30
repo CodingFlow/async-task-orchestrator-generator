@@ -24,7 +24,6 @@ namespace AsyncTaskOrchestratorGenerator
         }
 
         private static INamedTypeSymbol GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken) {
-            
             return context.TargetSymbol as INamedTypeSymbol;
         }
 
