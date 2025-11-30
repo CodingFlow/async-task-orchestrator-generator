@@ -23,14 +23,14 @@ namespace AsyncTaskOrchestratorGenerator
             return syntaxNode is TypeDeclarationSyntax;
         }
 
-        private static (INamedTypeSymbol, SemanticModel) GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken) {
+        private static INamedTypeSymbol GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken) {
             
-            return (context.TargetSymbol as INamedTypeSymbol, context.SemanticModel);
+            return context.TargetSymbol as INamedTypeSymbol;
         }
 
-        private static void Execute(SourceProductionContext context, (INamedTypeSymbol typeSymbol, SemanticModel semanticModel) typeInfo) {
-            var (classSource, className) = OutputGenerator.GenerateClassOutputs(typeInfo);
-            var (interfaceSource, interfaceName) = OutputGenerator.GenerateInterfaceOutputs(typeInfo.typeSymbol);
+        private static void Execute(SourceProductionContext context, INamedTypeSymbol typeSymbol) {
+            var (classSource, className) = OutputGenerator.GenerateClassOutputs(typeSymbol);
+            var (interfaceSource, interfaceName) = OutputGenerator.GenerateInterfaceOutputs(typeSymbol);
 
             context.AddSource($"{className}.generated.cs", SourceText.From(classSource, Encoding.UTF8, SourceHashAlgorithm.Sha256));
             context.AddSource($"{interfaceName}.generated.cs", SourceText.From(interfaceSource, Encoding.UTF8, SourceHashAlgorithm.Sha256));

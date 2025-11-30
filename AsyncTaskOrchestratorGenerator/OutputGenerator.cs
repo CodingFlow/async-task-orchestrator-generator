@@ -8,9 +8,7 @@ namespace AsyncTaskOrchestratorGenerator
 {
     internal static class OutputGenerator
     {
-        public static (string source, string className) GenerateClassOutputs((INamedTypeSymbol typeSymbol, SemanticModel semanticModel) typeInfo) {
-            var type = typeInfo.typeSymbol;
-            var semanticModel = typeInfo.semanticModel;
+        public static (string source, string className) GenerateClassOutputs(INamedTypeSymbol type) {
             var constructorArguments = GetAttributeConstructorArguments(type);
             var className = constructorArguments.First().Value.ToString();
             var executeMethodName = constructorArguments.ElementAt(1).Value.ToString();
@@ -50,10 +48,6 @@ namespace {type.ContainingNamespace.ToDisplayString()};
             return (source, className);
         }
 
-        private static System.Collections.Immutable.ImmutableArray<TypedConstant> GetAttributeConstructorArguments(INamedTypeSymbol type) {
-            return type.GetAttributes().First((a) => a.AttributeClass.Name == nameof(AsyncTaskOrchestratorAttribute)).ConstructorArguments;
-        }
-
         public static (string source, string interfaceName) GenerateInterfaceOutputs(INamedTypeSymbol type) {
             var constructorArguments = GetAttributeConstructorArguments(type);
             var className = constructorArguments.First().Value.ToString();
@@ -77,6 +71,10 @@ namespace {type.ContainingNamespace.ToDisplayString()};
 }}
 ";
             return (source, interfaceName);
+        }
+
+        private static System.Collections.Immutable.ImmutableArray<TypedConstant> GetAttributeConstructorArguments(INamedTypeSymbol type) {
+            return type.GetAttributes().First((a) => a.AttributeClass.Name == nameof(AsyncTaskOrchestratorAttribute)).ConstructorArguments;
         }
 
         private static (ExecuteMethodSignatureData, Dictionary<string, TaskData>, TaskData) CreateExecuteMethodData(INamedTypeSymbol type, IEnumerable<IFieldSymbol> fields, string executeMethodName) {
