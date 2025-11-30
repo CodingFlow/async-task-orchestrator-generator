@@ -19,7 +19,8 @@ public class Tests
     [Test]
     public async Task OneInterface() {
         var source = await ReadCSharpFile<OrchestratorSpec>(true);
-        var generated = await ReadCSharpFile<Orchestrator>(false);
+        var generatedClass = await ReadCSharpFile<Orchestrator>(false);
+        var generatedInterface = await ReadCSharpFile<IOrchestrator>(false);
 
         await new VerifyCS.Test
         {
@@ -35,7 +36,8 @@ public class Tests
                 Sources = { source },
                 GeneratedSources =
                 {
-                    (typeof(Main), "Orchestrator.generated.cs", SourceText.From(generated, Encoding.UTF8, SourceHashAlgorithm.Sha256)),
+                    (typeof(Main), "Orchestrator.generated.cs", SourceText.From(generatedClass, Encoding.UTF8, SourceHashAlgorithm.Sha256)),
+                    (typeof(Main), "IOrchestrator.generated.cs", SourceText.From(generatedInterface, Encoding.UTF8, SourceHashAlgorithm.Sha256)),
                 },
             },
         }.RunAsync();

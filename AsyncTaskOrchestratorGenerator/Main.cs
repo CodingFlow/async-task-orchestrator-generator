@@ -1,9 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -32,9 +29,11 @@ namespace AsyncTaskOrchestratorGenerator
         }
 
         private static void Execute(SourceProductionContext context, (INamedTypeSymbol typeSymbol, SemanticModel semanticModel) typeInfo) {
-            var (source, className) = OutputGenerator.GenerateOutputs(typeInfo);
+            var (classSource, className) = OutputGenerator.GenerateClassOutputs(typeInfo);
+            var (interfaceSource, interfaceName) = OutputGenerator.GenerateInterfaceOutputs(typeInfo.typeSymbol);
 
-            context.AddSource($"{className}.generated.cs", SourceText.From(source, Encoding.UTF8, SourceHashAlgorithm.Sha256));
+            context.AddSource($"{className}.generated.cs", SourceText.From(classSource, Encoding.UTF8, SourceHashAlgorithm.Sha256));
+            context.AddSource($"{interfaceName}.generated.cs", SourceText.From(interfaceSource, Encoding.UTF8, SourceHashAlgorithm.Sha256));
         }
     }
 }
